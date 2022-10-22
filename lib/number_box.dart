@@ -14,7 +14,7 @@ class MyNumberBox extends StatelessWidget {
       child: GestureDetector(
         onTap: function,
         child: Container(
-          color: revealed ? Colors.grey[400] : Colors.grey[300],
+          color: revealed ? Colors.grey[300] : Colors.grey[400],
           child: Center(child: Text(child.toString())),
         ),
       ),

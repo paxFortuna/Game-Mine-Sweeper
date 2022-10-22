@@ -24,6 +24,30 @@ class _HomePageState extends State<HomePage> {
     61,
   ];
 
+  void revealBoxNumbers(int index) {
+    setState(() {
+      squareStatus[index][1] = true;
+    });
+    scanBombs();
+  }
+
+  void scanBombs() {
+    for(int i = 0; i<numberOfSquares; i++){
+      // there are no bombs around initially
+      int numberOfBombAround = 0;
+
+      /*
+      check each square to see if it has bombs surrounding it,
+      there are 8 surrounding boxes to check
+       */
+
+      // check square to the left
+      if (bombLocation.contains(i - 1)) {
+          numberOfBombAround++;
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -64,12 +88,12 @@ class _HomePageState extends State<HomePage> {
                   ),
                   // button to refresh the game
                   Card(
-                    child: Icon(
+                    color: Colors.grey.shade700,
+                    child: const Icon(
                       Icons.refresh,
                       color: Colors.white,
                       size: 40,
                     ),
-                    color: Colors.grey.shade700,
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -93,27 +117,27 @@ class _HomePageState extends State<HomePage> {
                   itemBuilder: (context, index) {
                     if (bombLocation.contains(index)) {
                       return MyBomb(
-                        revealed: squareStatus[index][1],
                         child: index,
+                        revealed: squareStatus[index][1],
                         function: () {
                           // player tapped the bomb, so player loses
                         },
                       );
                     } else {
                       return MyNumberBox(
-                        revealed: squareStatus[index][1],
-                        child: index,
-                        function: () {
-                          // reveal current box
-                        }
-                      );
+                          child: index,
+                          revealed: squareStatus[index][1],
+                          function: () {
+                            // reveal current box
+                            revealBoxNumbers(index);
+                          });
                     }
                   }),
             ),
 
             // branding
-            Padding(
-              padding: const EdgeInsets.all(40.0),
+            const Padding(
+              padding: EdgeInsets.all(40.0),
               child: Text('Created by Fortuna'),
             )
           ],
