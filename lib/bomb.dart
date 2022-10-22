@@ -12,8 +12,7 @@ class MyBomb extends StatelessWidget {
     return GestureDetector(
       onTap: function,
       child: Container(
-        color: Colors.grey[800],
-        child: Center(child: Text('X')),
+        color: revealed ? Colors.grey[800] : Colors.grey[400],
       ),
     );
   }

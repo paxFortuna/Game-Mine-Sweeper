@@ -22,14 +22,117 @@ class _HomePageState extends State<HomePage> {
     4,
     5,
     6,
-    40,
+   41, 42,43,
     61,
   ];
 
+  bool bombsRevealed = false;
+
   void revealBoxNumbers(int index) {
-    setState(() {
-      squareStatus[index][1] = true;
-    });
+    // reveal current box if it is a number : 1, 2, 3 etc
+    if (squareStatus[index][0] != 0) {
+      setState(() {
+        squareStatus[index][1] = true;
+      });
+      // if current box is 0
+    } else if (squareStatus[index][0] == 0) {
+      // reveal current box, and the 8 surrounding boxes, unless you're on a wall
+      setState(() {
+        // reveal current box
+        squareStatus[index][1] = true;
+
+        //reveal left box (unless we are currently on the left wall)
+        if (index % numberInEachRow != 0) {
+          //if next box isn't revealed yet and it is a 0, then recurse
+          if (squareStatus[index - 1][0] == 0 &&
+              squareStatus[index - 1][1] == false) {
+            revealBoxNumbers(index - 1);
+          }
+          // reveal left box
+          squareStatus[index - 1][1] = true;
+        }
+
+        // reveal top left box (unless we are currently on the top row or left wall
+        if (index % numberInEachRow != 0 && index >= numberInEachRow) {
+          //if next box isn't revealed yet and is a 0, then recurse
+          if (squareStatus[index - 1 - numberInEachRow][0] == 0 &&
+              squareStatus[index - 1 - numberInEachRow][1] == false) {
+            revealBoxNumbers(index - 1 - numberInEachRow);
+          }
+
+          squareStatus[index - 1 - numberInEachRow][1] = true;
+        }
+
+        // reveal top box (unless we are on the top row)
+        if (index >= numberInEachRow) {
+          // if next box is not revealed yet and is a 0, then recurse
+          if (squareStatus[index - numberInEachRow][0] == 0 &&
+              squareStatus[index - numberInEachRow][1] == false) {
+            revealBoxNumbers(index - numberInEachRow);
+          }
+
+          squareStatus[index - numberInEachRow][1] = true;
+        }
+
+        // reveal top right box (unless we are currently on the top row or right wall
+        if (index % numberInEachRow != numberInEachRow - 1 &&
+            index >= numberInEachRow) {
+          //if next box isn't revealed yet and is a 0, then recurse
+          if (squareStatus[index + 1 - numberInEachRow][0] == 0 &&
+              squareStatus[index + 1 - numberInEachRow][1] == false) {
+            revealBoxNumbers(index + 1 - numberInEachRow);
+          }
+
+          squareStatus[index + 1 - numberInEachRow][1] = true;
+        }
+
+        // reveal right box (unless we are on the right wall)
+        if (index % numberInEachRow != numberInEachRow - 1) {
+          // if next box is not revealed yet and is a 0, then recurse
+          if (squareStatus[index + 1][0] == 0 &&
+              squareStatus[index + 1][1] == false) {
+
+            revealBoxNumbers(index + 1);
+          }
+          squareStatus[index +1][1] = true;
+        }
+
+        // reveal bottom right box (unless we are currently on the bottom row)
+        if (index < numberOfSquares- numberInEachRow &&
+            index % numberInEachRow != numberInEachRow-1) {
+          //if next box isn't revealed yet and is a 0, then recurse
+          if (squareStatus[index + 1 + numberInEachRow][0] == 0 &&
+              squareStatus[index + 1 + numberInEachRow][1] == false) {
+            revealBoxNumbers(index + 1 + numberInEachRow);
+          }
+
+          squareStatus[index + 1 + numberInEachRow][1] = true;
+        }
+
+        // reveal bottom box (unless we are on the bottom row)
+        if (index <= numberOfSquares - numberInEachRow) {
+          // if next box is not revealed yet and is a 0, then recurse
+          if (squareStatus[index + numberInEachRow][0] == 0 &&
+              squareStatus[index + numberInEachRow][1] == false) {
+            revealBoxNumbers(index + numberInEachRow);
+          }
+          squareStatus[index + numberInEachRow][1] = true;
+        }
+
+        // reveal bottom left box (unless we are currently on the bottom row or left wall
+        if (index % numberInEachRow != 0 && index < numberOfSquares - numberInEachRow) {
+          //if next box isn't revealed yet and is a 0, then recurse
+          if (squareStatus[index - 1 + numberInEachRow][0] == 0 &&
+              squareStatus[index - 1 + numberInEachRow][1] == false) {
+            revealBoxNumbers(index - 1 + numberInEachRow);
+          }
+
+          squareStatus[index - 1 + numberInEachRow][1] = true;
+        }
+
+      });
+    }
+
     scanBombs();
   }
 
@@ -50,8 +153,9 @@ class _HomePageState extends State<HomePage> {
 
       // check square to the top left, unless it is in the first column or first row
       if (bombLocation.contains(i - 1 - numberInEachRow) &&
-          i % numberInEachRow != 0 && i >= numberInEachRow) {
-            numberOfBombAround++;
+          i % numberInEachRow != 0 &&
+          i >= numberInEachRow) {
+        numberOfBombAround++;
       }
 
       // check square to the top, unless it is in the first column or first row
@@ -61,30 +165,34 @@ class _HomePageState extends State<HomePage> {
 
       // check square to the top right, unless it is in the first row or last colum
       if (bombLocation.contains(i + 1 - numberInEachRow) &&
-          i % numberInEachRow != numberInEachRow -1 && i >= numberInEachRow) {
+          i % numberInEachRow != numberInEachRow - 1 &&
+          i >= numberInEachRow) {
         numberOfBombAround++;
       }
 
       // check square to the right, unless it is in the last column
-      if (bombLocation.contains(i + 1) && i % numberInEachRow != numberInEachRow -1) {
+      if (bombLocation.contains(i + 1) &&
+          i % numberInEachRow != numberInEachRow - 1) {
         numberOfBombAround++;
       }
 
       // check square to the bottom right, unless it is in the last colum or last row
       if (bombLocation.contains(i + 1 + numberInEachRow) &&
-          i % numberInEachRow != numberInEachRow -1 && i < numberOfSquares - numberInEachRow) {
+          i % numberInEachRow != numberInEachRow - 1 &&
+          i < numberOfSquares - numberInEachRow) {
         numberOfBombAround++;
       }
 
       // check square to the bottom, unless it is in the last row
       if (bombLocation.contains(i + numberInEachRow) &&
-         i < numberOfSquares - numberInEachRow) {
+          i < numberOfSquares - numberInEachRow) {
         numberOfBombAround++;
       }
 
       // check square to the bottom left, unless it is in the last colum or last row
       if (bombLocation.contains(i - 1 + numberInEachRow) &&
-          i % numberInEachRow != 0 && i < numberOfSquares - numberInEachRow) {
+          i % numberInEachRow != 0 &&
+          i < numberOfSquares - numberInEachRow) {
         numberOfBombAround++;
       }
 
@@ -122,9 +230,9 @@ class _HomePageState extends State<HomePage> {
                   //display number of bombs
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Text(
-                        '6',
+                        bombLocation.length.toString(),
                         style: TextStyle(fontSize: 40),
                       ),
                       Text(
@@ -164,9 +272,13 @@ class _HomePageState extends State<HomePage> {
                   itemBuilder: (context, index) {
                     if (bombLocation.contains(index)) {
                       return MyBomb(
-                        revealed: squareStatus[index][1],
+                        // revealed: squareStatus[index][1],
+                        revealed: bombsRevealed,
                         function: () {
                           // player tapped the bomb, so player loses
+                          setState(() {
+                            bombsRevealed = true;
+                          });
                         },
                       );
                     } else {
