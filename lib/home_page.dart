@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game_mine_sweeper/bomb.dart';
 import 'package:game_mine_sweeper/number_box.dart';
 
 class HomePage extends StatefulWidget {
@@ -12,12 +13,15 @@ class _HomePageState extends State<HomePage> {
   // variables
   int numberOfSquares = 9 * 9;
   int numberInEachRow = 9;
+
   // [number of bombs around, revealed=true/false]
-  var squareStatus =[];
+  var squareStatus = [];
 
   // bomb locations
   final List<int> bombLocation = [
-    4, 40, 61,
+    4,
+    40,
+    61,
   ];
 
   @override
@@ -25,7 +29,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     // initially, each square has 0 bombs around, and is not revealed
-    for (int i = 0; i<numberOfSquares; i++){
+    for (int i = 0; i < numberOfSquares; i++) {
       squareStatus.add([0, false]);
     }
   }
@@ -33,14 +37,14 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Colors.grey[200],
       body: SafeArea(
         child: Column(
           children: [
             // game stats and menu
             Container(
               height: 150,
-             //  color: Colors.grey,
+              //  color: Colors.grey,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -81,17 +85,30 @@ class _HomePageState extends State<HomePage> {
             // grid
             Expanded(
               child: GridView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: numberInEachRow,
-                ),
-                itemCount: numberOfSquares,
-                itemBuilder: (context, index) {
-                  return MyNumberBox(
-                    child: index,
-                  );
-                },
-              ),
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: numberInEachRow,
+                  ),
+                  itemCount: numberOfSquares,
+                  itemBuilder: (context, index) {
+                    if (bombLocation.contains(index)) {
+                      return MyBomb(
+                        revealed: squareStatus[index][1],
+                        child: index,
+                        function: () {
+                          // player tapped the bomb, so player loses
+                        },
+                      );
+                    } else {
+                      return MyNumberBox(
+                        revealed: squareStatus[index][1],
+                        child: index,
+                        function: () {
+                          // reveal current box
+                        }
+                      );
+                    }
+                  }),
             ),
 
             // branding
