@@ -29,6 +29,8 @@ class _HomePageState extends State<HomePage> {
   ];
 
   bool bombsRevealed = false;
+  int score = 0;
+  int times = 0;
 
   @override
   void initState() {
@@ -45,7 +47,16 @@ class _HomePageState extends State<HomePage> {
       bombsRevealed = false;
       for (int i = 0; i < numberOfSquares; i++) {
         squareStatus[i][1] = false;
+        score ++;
       }
+      times++;
+    });
+  }
+
+  void resetScore() {
+    setState(() {
+      score = 0;
+      times = 0;
     });
   }
 
@@ -229,8 +240,8 @@ class _HomePageState extends State<HomePage> {
         builder: (context) {
           return AlertDialog(
             backgroundColor: Colors.grey[700],
-            title: Text(
-              'YOU LOST',
+            title: const Text(
+              'Y O U L O S T',
               style: TextStyle(
                 color: Colors.white,
               ),
@@ -242,64 +253,106 @@ class _HomePageState extends State<HomePage> {
                   restartGame();
                   Navigator.pop(context);
                 },
-                child: Icon(Icons.refresh),
+                child: const Icon(Icons.refresh),
               )
             ],
           );
         });
   }
 
+  void playerWon() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Colors.grey[700],
+            title: const Text(
+              'Y O U  W I N',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            actions: [
+              MaterialButton(
+                color: Colors.grey[100],
+                onPressed: () {
+                  restartGame();
+                  Navigator.pop(context);
+                },
+                child: const Icon(Icons.refresh),
+              )
+            ],
+          );
+        });
+  }
+
+  void checkWinner() {
+    // check how many boxes yet to reveal
+    int unrevealedBoxes = 0;
+    for (int i = 0; i < numberOfSquares; i++) {
+      if (squareStatus[i][1] == false) {
+        unrevealedBoxes++;
+      }
+    }
+    // if this number is the same as the number of bombs, then player WINS!
+    if (unrevealedBoxes == bombLocation.length) {
+      playerWon();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
-      body: Column(
-        children: [
-          // game stats and menu
-          Container(
-            height: 150,
-            //  color: Colors.grey,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                //display number of bombs
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      bombLocation.length.toString(),
-                      style: TextStyle(fontSize: 40),
-                    ),
-                    Text(
-                      'B O M B',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ],
-                ),
-                // button to refresh the game
-                Card(
-                  color: Colors.grey.shade700,
-                  child: const Icon(
-                    Icons.refresh,
-                    color: Colors.white,
-                    size: 40,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // game stats and menu
+            Container(
+              height: 150,
+              //  color: Colors.grey,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  //display number of bombs
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                  score.toString(),
+                        //bombLocation.length.toString(),
+                        style: const TextStyle(fontSize: 40),
+                      ),
+                      const Text('B O M B', style: TextStyle(fontSize: 20)),
+                    ],
                   ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text('0', style: TextStyle(fontSize: 40)),
-                    Text('T I M E', style: TextStyle(fontSize: 20)),
-                  ],
-                ),
-              ],
+                  // button to refresh the game
+                  GestureDetector(
+                    onTap: resetScore,
+                    child: Card(
+                      color: Colors.grey.shade700,
+                      child: const Icon(
+                        Icons.refresh,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(times.toString(), style: TextStyle(fontSize: 40)),
+                      Text('T I M E', style: TextStyle(fontSize: 20)),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          // grid
-          Expanded(
-            child: GridView.builder(
-                physics: NeverScrollableScrollPhysics(),
+            // grid
+            Expanded(
+              child: GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: numberInEachRow,
                 ),
@@ -319,23 +372,27 @@ class _HomePageState extends State<HomePage> {
                     );
                   } else {
                     return MyNumberBox(
-                        // child: index % numberInEachRow,
-                        child: squareStatus[index][0],
-                        revealed: squareStatus[index][1],
-                        function: () {
-                          // reveal current box
-                          revealBoxNumbers(index);
-                        });
+                      // child: index % numberInEachRow,
+                      child: squareStatus[index][0],
+                      revealed: squareStatus[index][1],
+                      function: () {
+                        // reveal current box
+                        revealBoxNumbers(index);
+                        checkWinner();
+                      },
+                    );
                   }
-                }),
-          ),
+                },
+              ),
+            ),
 
-          // branding
-          const Padding(
-            padding: EdgeInsets.all(40.0),
-            child: Text('Created by Fortuna'),
-          )
-        ],
+            // branding
+            const Padding(
+              padding: EdgeInsets.all(40.0),
+              child: Text('Created by Fortuna'),
+            )
+          ],
+        ),
       ),
     );
   }

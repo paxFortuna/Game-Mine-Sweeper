@@ -11,8 +11,11 @@ class MyBomb extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: function,
-      child: Container(
-        color: revealed ? Colors.grey[800] : Colors.grey[400],
+      child: Padding(
+        padding: const EdgeInsets.all(1.0),
+        child: Container(
+          color: revealed ? Colors.grey[800] : Colors.grey[400],
+        ),
       ),
     );
   }
