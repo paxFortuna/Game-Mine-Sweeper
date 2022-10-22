@@ -22,11 +22,32 @@ class _HomePageState extends State<HomePage> {
     4,
     5,
     6,
-   41, 42,43,
+    41,
+    42,
+    43,
     61,
   ];
 
   bool bombsRevealed = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // initially, each square has 0 bombs around, and is not revealed
+    for (int i = 0; i < numberOfSquares; i++) {
+      squareStatus.add([0, false]);
+    }
+  }
+
+  void restartGame() {
+    setState(() {
+      bombsRevealed = false;
+      for (int i = 0; i < numberOfSquares; i++) {
+        squareStatus[i][1] = false;
+      }
+    });
+  }
 
   void revealBoxNumbers(int index) {
     // reveal current box if it is a number : 1, 2, 3 etc
@@ -91,15 +112,14 @@ class _HomePageState extends State<HomePage> {
           // if next box is not revealed yet and is a 0, then recurse
           if (squareStatus[index + 1][0] == 0 &&
               squareStatus[index + 1][1] == false) {
-
             revealBoxNumbers(index + 1);
           }
-          squareStatus[index +1][1] = true;
+          squareStatus[index + 1][1] = true;
         }
 
         // reveal bottom right box (unless we are currently on the bottom row)
-        if (index < numberOfSquares- numberInEachRow &&
-            index % numberInEachRow != numberInEachRow-1) {
+        if (index < numberOfSquares - numberInEachRow &&
+            index % numberInEachRow != numberInEachRow - 1) {
           //if next box isn't revealed yet and is a 0, then recurse
           if (squareStatus[index + 1 + numberInEachRow][0] == 0 &&
               squareStatus[index + 1 + numberInEachRow][1] == false) {
@@ -120,7 +140,8 @@ class _HomePageState extends State<HomePage> {
         }
 
         // reveal bottom left box (unless we are currently on the bottom row or left wall
-        if (index % numberInEachRow != 0 && index < numberOfSquares - numberInEachRow) {
+        if (index % numberInEachRow != 0 &&
+            index < numberOfSquares - numberInEachRow) {
           //if next box isn't revealed yet and is a 0, then recurse
           if (squareStatus[index - 1 + numberInEachRow][0] == 0 &&
               squareStatus[index - 1 + numberInEachRow][1] == false) {
@@ -129,7 +150,6 @@ class _HomePageState extends State<HomePage> {
 
           squareStatus[index - 1 + numberInEachRow][1] = true;
         }
-
       });
     }
 
@@ -203,104 +223,119 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-
-    // initially, each square has 0 bombs around, and is not revealed
-    for (int i = 0; i < numberOfSquares; i++) {
-      squareStatus.add([0, false]);
-    }
+  void playerLost() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Colors.grey[700],
+            title: Text(
+              'YOU LOST',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            actions: [
+              MaterialButton(
+                color: Colors.grey[100],
+                onPressed: () {
+                  restartGame();
+                  Navigator.pop(context);
+                },
+                child: Icon(Icons.refresh),
+              )
+            ],
+          );
+        });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
-      body: SafeArea(
-        child: Column(
-          children: [
-            // game stats and menu
-            Container(
-              height: 150,
-              //  color: Colors.grey,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  //display number of bombs
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        bombLocation.length.toString(),
-                        style: TextStyle(fontSize: 40),
-                      ),
-                      Text(
-                        'B O M B',
-                        style: TextStyle(fontSize: 20),
-                      ),
-                    ],
-                  ),
-                  // button to refresh the game
-                  Card(
-                    color: Colors.grey.shade700,
-                    child: const Icon(
-                      Icons.refresh,
-                      color: Colors.white,
-                      size: 40,
+      body: Column(
+        children: [
+          // game stats and menu
+          Container(
+            height: 150,
+            //  color: Colors.grey,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                //display number of bombs
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      bombLocation.length.toString(),
+                      style: TextStyle(fontSize: 40),
                     ),
+                    Text(
+                      'B O M B',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ],
+                ),
+                // button to refresh the game
+                Card(
+                  color: Colors.grey.shade700,
+                  child: const Icon(
+                    Icons.refresh,
+                    color: Colors.white,
+                    size: 40,
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text('0', style: TextStyle(fontSize: 40)),
-                      Text('T I M E', style: TextStyle(fontSize: 20)),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text('0', style: TextStyle(fontSize: 40)),
+                    Text('T I M E', style: TextStyle(fontSize: 20)),
+                  ],
+                ),
+              ],
             ),
+          ),
 
-            // grid
-            Expanded(
-              child: GridView.builder(
-                  physics: NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: numberInEachRow,
-                  ),
-                  itemCount: numberOfSquares,
-                  itemBuilder: (context, index) {
-                    if (bombLocation.contains(index)) {
-                      return MyBomb(
-                        // revealed: squareStatus[index][1],
-                        revealed: bombsRevealed,
+          // grid
+          Expanded(
+            child: GridView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: numberInEachRow,
+                ),
+                itemCount: numberOfSquares,
+                itemBuilder: (context, index) {
+                  if (bombLocation.contains(index)) {
+                    return MyBomb(
+                      // revealed: squareStatus[index][1],
+                      revealed: bombsRevealed,
+                      function: () {
+                        // player tapped the bomb, so player loses
+                        setState(() {
+                          bombsRevealed = true;
+                        });
+                        playerLost();
+                      },
+                    );
+                  } else {
+                    return MyNumberBox(
+                        // child: index % numberInEachRow,
+                        child: squareStatus[index][0],
+                        revealed: squareStatus[index][1],
                         function: () {
-                          // player tapped the bomb, so player loses
-                          setState(() {
-                            bombsRevealed = true;
-                          });
-                        },
-                      );
-                    } else {
-                      return MyNumberBox(
-                          // child: index % numberInEachRow,
-                          child: squareStatus[index][0],
-                          revealed: squareStatus[index][1],
-                          function: () {
-                            // reveal current box
-                            revealBoxNumbers(index);
-                          });
-                    }
-                  }),
-            ),
+                          // reveal current box
+                          revealBoxNumbers(index);
+                        });
+                  }
+                }),
+          ),
 
-            // branding
-            const Padding(
-              padding: EdgeInsets.all(40.0),
-              child: Text('Created by Fortuna'),
-            )
-          ],
-        ),
+          // branding
+          const Padding(
+            padding: EdgeInsets.all(40.0),
+            child: Text('Created by Fortuna'),
+          )
+        ],
       ),
     );
   }
