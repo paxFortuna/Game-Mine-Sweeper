@@ -20,6 +20,8 @@ class _HomePageState extends State<HomePage> {
   // bomb locations
   final List<int> bombLocation = [
     4,
+    5,
+    6,
     40,
     61,
   ];
@@ -32,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void scanBombs() {
-    for(int i = 0; i<numberOfSquares; i++){
+    for (int i = 0; i < numberOfSquares; i++) {
       // there are no bombs around initially
       int numberOfBombAround = 0;
 
@@ -41,10 +43,55 @@ class _HomePageState extends State<HomePage> {
       there are 8 surrounding boxes to check
        */
 
-      // check square to the left
-      if (bombLocation.contains(i - 1)) {
-          numberOfBombAround++;
+      // check square to the left, unless it is in the first column
+      if (bombLocation.contains(i - 1) && i % numberInEachRow != 0) {
+        numberOfBombAround++;
       }
+
+      // check square to the top left, unless it is in the first column or first row
+      if (bombLocation.contains(i - 1 - numberInEachRow) &&
+          i % numberInEachRow != 0 && i >= numberInEachRow) {
+            numberOfBombAround++;
+      }
+
+      // check square to the top, unless it is in the first column or first row
+      if (bombLocation.contains(i - numberInEachRow) && i >= numberInEachRow) {
+        numberOfBombAround++;
+      }
+
+      // check square to the top right, unless it is in the first row or last colum
+      if (bombLocation.contains(i + 1 - numberInEachRow) &&
+          i % numberInEachRow != numberInEachRow -1 && i >= numberInEachRow) {
+        numberOfBombAround++;
+      }
+
+      // check square to the right, unless it is in the last column
+      if (bombLocation.contains(i + 1) && i % numberInEachRow != numberInEachRow -1) {
+        numberOfBombAround++;
+      }
+
+      // check square to the bottom right, unless it is in the last colum or last row
+      if (bombLocation.contains(i + 1 + numberInEachRow) &&
+          i % numberInEachRow != numberInEachRow -1 && i < numberOfSquares - numberInEachRow) {
+        numberOfBombAround++;
+      }
+
+      // check square to the bottom, unless it is in the last row
+      if (bombLocation.contains(i + numberInEachRow) &&
+         i < numberOfSquares - numberInEachRow) {
+        numberOfBombAround++;
+      }
+
+      // check square to the bottom left, unless it is in the last colum or last row
+      if (bombLocation.contains(i - 1 + numberInEachRow) &&
+          i % numberInEachRow != 0 && i < numberOfSquares - numberInEachRow) {
+        numberOfBombAround++;
+      }
+
+      // add total number of bombs around to squart status
+      setState(() {
+        squareStatus[i][0] = numberOfBombAround;
+      });
     }
   }
 
@@ -117,7 +164,6 @@ class _HomePageState extends State<HomePage> {
                   itemBuilder: (context, index) {
                     if (bombLocation.contains(index)) {
                       return MyBomb(
-                        child: index,
                         revealed: squareStatus[index][1],
                         function: () {
                           // player tapped the bomb, so player loses
@@ -125,7 +171,8 @@ class _HomePageState extends State<HomePage> {
                       );
                     } else {
                       return MyNumberBox(
-                          child: index,
+                          // child: index % numberInEachRow,
+                          child: squareStatus[index][0],
                           revealed: squareStatus[index][1],
                           function: () {
                             // reveal current box

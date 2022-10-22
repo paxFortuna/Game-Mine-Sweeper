@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class MyBomb extends StatelessWidget {
-  final child;
+  // final child;
   bool revealed;
   final function;
 
-  MyBomb({Key? key, this.child, required this.revealed, this.function}) : super(key: key);
+  MyBomb({Key? key, required this.revealed, this.function}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class MyBomb extends StatelessWidget {
       onTap: function,
       child: Container(
         color: Colors.grey[800],
-        child: Center(child: Text(child.toString())),
+        child: Center(child: Text('X')),
       ),
     );
   }
